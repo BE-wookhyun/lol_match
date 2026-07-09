@@ -1,0 +1,9 @@
+.git
+.gradle
+build
+!gradle/wrapper
+.idea
+*.iml
+.env
+.env.local
+HELP.md
