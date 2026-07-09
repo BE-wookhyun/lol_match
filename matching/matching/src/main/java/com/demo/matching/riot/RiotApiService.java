@@ -3,6 +3,8 @@ package com.demo.matching.riot;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
@@ -12,6 +14,7 @@ import org.springframework.web.client.RestClient;
 @Service
 public class RiotApiService {
 
+    private static final Logger log = LoggerFactory.getLogger(RiotApiService.class);
     private static final String SOLO_QUEUE = "RANKED_SOLO_5x5";
 
     private static final Map<String, String> TIER_MAP = Map.of(
@@ -44,13 +47,18 @@ public class RiotApiService {
     }
 
     public RiotAccountDto fetchAccount(String lolId, String lolTag) {
-        return riotAccountClient.get()
+        long startedAt = System.currentTimeMillis();
+        RiotAccountDto account = riotAccountClient.get()
                 .uri("/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}", lolId, lolTag)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                    log.warn("Riot account lookup failed: lolId={}, lolTag={}, status={}", lolId, lolTag, res.getStatusCode());
                     throw new RiotAccountNotFoundException(lolId, lolTag);
                 })
                 .body(RiotAccountDto.class);
+        log.info("Riot account lookup succeeded: lolId={}, lolTag={}, durationMs={}",
+                lolId, lolTag, System.currentTimeMillis() - startedAt);
+        return account;
     }
 
     public RiotLeagueEntryDto fetchSoloRankEntry(String puuid, String lolId, String lolTag) {
