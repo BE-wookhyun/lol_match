@@ -1,0 +1,32 @@
+# Root safety net for the whole monorepo.
+# frontend/ and matching/matching/ have their own project-specific .gitignore;
+# this one catches anything created at the repo root or missed elsewhere.
+
+# Env files / secrets (never commit real API keys, DB passwords, etc.)
+.env
+.env.local
+.env.*.local
+!.env.example
+!**/.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.iml
+
+# Logs
+*.log
+logs/
+
+# Node (in case anything is run from the repo root)
+node_modules/
+
+# Misc archives / temp
+*.tmp
+*.bak

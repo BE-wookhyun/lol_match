@@ -1,0 +1,59 @@
+.section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px 24px;
+  margin-bottom: 20px;
+  scroll-margin-top: 72px;
+  border-top: 4px solid var(--tier-color, var(--color-primary));
+}
+
+.section[data-tier='CHALLENGER'] { --tier-color: var(--tier-challenger); }
+.section[data-tier='GRANDMASTER'] { --tier-color: var(--tier-grandmaster); }
+.section[data-tier='MASTER'] { --tier-color: var(--tier-master); }
+.section[data-tier='DIAMOND'] { --tier-color: var(--tier-diamond); }
+.section[data-tier='EMERALD'] { --tier-color: var(--tier-emerald); }
+.section[data-tier='PLATINUM'] { --tier-color: var(--tier-platinum); }
+.section[data-tier='GOLD'] { --tier-color: var(--tier-gold); }
+.section[data-tier='SILVER'] { --tier-color: var(--tier-silver); }
+.section[data-tier='BRONZE'] { --tier-color: var(--tier-bronze); }
+.section[data-tier='IRON'] { --tier-color: var(--tier-iron); }
+
+.section[data-line='TOP'] { --tier-color: #4fa3f7; }
+.section[data-line='JGL'] { --tier-color: #2ecc91; }
+.section[data-line='MID'] { --tier-color: #f2a93c; }
+.section[data-line='BOT'] { --tier-color: #e5484d; }
+.section[data-line='SPT'] { --tier-color: #9b59f6; }
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon {
+  display: block;
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.count {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}

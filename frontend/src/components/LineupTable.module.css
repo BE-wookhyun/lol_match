@@ -1,0 +1,75 @@
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 48px 1fr 1fr 110px 28px;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  min-height: 44px;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.row.over {
+  border-color: var(--color-accent);
+  background: var(--color-primary-light);
+}
+
+.lineTag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--line-color, var(--color-primary));
+  border-radius: 4px;
+  padding: 3px 0;
+  text-align: center;
+}
+
+.row[data-line='TOP'] { --line-color: #4fa3f7; }
+.row[data-line='JGL'] { --line-color: #2ecc91; }
+.row[data-line='MID'] { --line-color: #f2a93c; }
+.row[data-line='BOT'] { --line-color: #e5484d; }
+.row[data-line='SPT'] { --line-color: #9b59f6; }
+
+.name {
+  font-weight: 700;
+  font-size: 13px;
+  word-break: keep-all;
+}
+
+.lolId {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  word-break: keep-all;
+}
+
+.tier {
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.placeholder {
+  grid-column: 2 / 5;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.removeButton {
+  border: none;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  justify-self: end;
+}
+
+.removeButton:hover {
+  color: var(--color-accent);
+}

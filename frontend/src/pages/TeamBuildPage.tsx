@@ -1,0 +1,316 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { toPng } from 'html-to-image';
+import DraggableStreamerCard from '../components/DraggableStreamerCard';
+import LineupTable from '../components/LineupTable';
+import Modal from '../components/Modal';
+import { fetchStreamers } from '../api/streamers';
+import { createTeam } from '../api/teams';
+import { LINE_ORDER, LINE_LABEL_KO, TIER_ORDER, TIER_LABEL_KO } from '../constants/tiers';
+import type { Line, Streamer, TeamLineup, TierName } from '../types';
+import styles from './TeamBuildPage.module.css';
+
+export default function TeamBuildPage() {
+  const [streamers, setStreamers] = useState<Streamer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [lineFilter, setLineFilter] = useState<Line | 'ALL'>('ALL');
+  const [tierFilter, setTierFilter] = useState<TierName | 'ALL'>('ALL');
+
+  const [teamName, setTeamName] = useState('');
+  const [captainInput, setCaptainInput] = useState('');
+  const [captain, setCaptain] = useState<Streamer | null>(null);
+  const [captainError, setCaptainError] = useState('');
+
+  const [lineup, setLineup] = useState<TeamLineup>({});
+  const [mismatch, setMismatch] = useState<{ line: Line; streamer: Streamer } | null>(null);
+  const [resultOpen, setResultOpen] = useState(false);
+  const [resultStep, setResultStep] = useState<'name' | 'result'>('name');
+  const [teamNameError, setTeamNameError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  const captureRef = useRef<HTMLDivElement>(null);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+
+  useEffect(() => {
+    setLoading(true);
+    setLoadError(null);
+    fetchStreamers()
+      .then(setStreamers)
+      .catch((err: Error) => setLoadError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  function resolveStreamer(seq: number | undefined): Streamer | undefined {
+    if (seq === undefined) return undefined;
+    return streamers.find((s) => s.seq === seq);
+  }
+
+  const assignedSeqs = useMemo(() => new Set(Object.values(lineup)), [lineup]);
+
+  const pool = useMemo(() => {
+    return streamers.filter((s) => {
+      if (assignedSeqs.has(s.seq)) return false;
+      if (lineFilter !== 'ALL' && s.line !== lineFilter) return false;
+      if (tierFilter !== 'ALL' && s.tier !== tierFilter) return false;
+      return true;
+    });
+  }, [streamers, lineFilter, tierFilter, assignedSeqs]);
+
+  const canBuild =
+    teamName.trim() !== '' && captain !== null && LINE_ORDER.every((line) => lineup[line] !== undefined);
+
+  function handleCaptainConfirm() {
+    const found = streamers.find((s) => s.streamerName === captainInput.trim());
+    if (!found) {
+      setCaptainError('데이터베이스에 등록된 스트리머명이 아닙니다.');
+      setCaptain(null);
+      return;
+    }
+    setCaptainError('');
+    setCaptain(found);
+    setLineup((prev) => ({ ...prev, [found.line]: found.seq }));
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over) return;
+    const line = over.data.current?.line as Line | undefined;
+    const streamer = active.data.current?.streamer as Streamer | undefined;
+    if (!line || !streamer) return;
+
+    if (streamer.line === line) {
+      setLineup((prev) => ({ ...prev, [line]: streamer.seq }));
+    } else {
+      setMismatch({ line, streamer });
+    }
+  }
+
+  function confirmMismatch() {
+    if (!mismatch) return;
+    setLineup((prev) => ({ ...prev, [mismatch.line]: mismatch.streamer.seq }));
+    setMismatch(null);
+  }
+
+  function handleRemove(line: Line) {
+    setLineup((prev) => {
+      const next = { ...prev };
+      delete next[line];
+      return next;
+    });
+  }
+
+  function openResultModal() {
+    setTeamNameError('');
+    setSaveError('');
+    setSaved(false);
+    setResultStep('name');
+    setResultOpen(true);
+  }
+
+  function closeResultModal() {
+    setResultOpen(false);
+    setResultStep('name');
+    setTeamNameError('');
+    setSaveError('');
+    setSaved(false);
+  }
+
+  function handleConfirmTeamName() {
+    if (teamName.trim() === '') {
+      setTeamNameError('팀명을 입력해주세요.');
+      return;
+    }
+    setTeamNameError('');
+    setResultStep('result');
+  }
+
+  async function handleConfirmResult() {
+    if (!canBuild || !captain) {
+      closeResultModal();
+      return;
+    }
+
+    const lineupPayload: Partial<Record<Line, string>> = {};
+    for (const line of LINE_ORDER) {
+      const streamer = resolveStreamer(lineup[line]);
+      if (streamer) lineupPayload[line] = streamer.streamerName;
+    }
+
+    setSaving(true);
+    setSaveError('');
+    try {
+      await createTeam({
+        teamName: teamName.trim(),
+        captainStreamerName: captain.streamerName,
+        lineup: lineupPayload,
+        forceLineMismatch: true,
+      });
+      setSaved(true);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : '팀 저장에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleCapture() {
+    if (!captureRef.current) return;
+    const dataUrl = await toPng(captureRef.current, { pixelRatio: 2 });
+    const link = document.createElement('a');
+    link.download = `${teamName || 'team'}-lineup.png`;
+    link.href = dataUrl;
+    link.click();
+  }
+
+  return (
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div className={styles.page}>
+        <h1 className={styles.title}>팀 구성하기</h1>
+
+        {loading && <p>불러오는 중...</p>}
+        {loadError && <p className={styles.errorText}>{loadError}</p>}
+
+        <div className={styles.layout}>
+          <aside className={styles.poolPanel}>
+            <div className={styles.filters}>
+              <label className={styles.filterLabel}>
+                라인
+                <select value={lineFilter} onChange={(e) => setLineFilter(e.target.value as Line | 'ALL')}>
+                  <option value="ALL">전체</option>
+                  {LINE_ORDER.map((line) => (
+                    <option key={line} value={line}>
+                      {LINE_LABEL_KO[line]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={styles.filterLabel}>
+                티어
+                <select value={tierFilter} onChange={(e) => setTierFilter(e.target.value as TierName | 'ALL')}>
+                  <option value="ALL">전체</option>
+                  {TIER_ORDER.map((tier) => (
+                    <option key={tier} value={tier}>
+                      {TIER_LABEL_KO[tier]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className={styles.pool}>
+              {pool.map((streamer) => (
+                <DraggableStreamerCard key={streamer.seq} streamer={streamer} />
+              ))}
+              {pool.length === 0 && <p className={styles.emptyPool}>조건에 맞는 스트리머가 없습니다.</p>}
+            </div>
+          </aside>
+
+          <section className={styles.buildPanel}>
+            <div className={styles.captainRow}>
+              <label className={styles.teamNameLabel}>
+                팀장
+                <input
+                  value={captainInput}
+                  onChange={(e) => setCaptainInput(e.target.value)}
+                  placeholder="본인 스트리머명"
+                />
+              </label>
+              <button type="button" className={styles.confirmButton} onClick={handleCaptainConfirm}>
+                확인
+              </button>
+              {captain && <span className={styles.captainBadge}>팀장: {captain.streamerName}</span>}
+            </div>
+            {captainError && <p className={styles.errorText}>{captainError}</p>}
+
+            <div ref={captureRef} className={styles.captureArea}>
+              <p className={styles.captureTeamName}>{teamName || '팀명 미입력'}</p>
+              <LineupTable lineup={lineup} resolveStreamer={resolveStreamer} editable onRemove={handleRemove} />
+            </div>
+
+            <div className={styles.buildActions}>
+              <button type="button" className={styles.buildButton} onClick={openResultModal}>
+                팀 빌드
+              </button>
+              <button type="button" className={styles.captureButton} onClick={handleCapture} title="이미지로 캡처">
+                📷
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {mismatch && (
+        <Modal onClose={() => setMismatch(null)}>
+          <p className={styles.modalText}>
+            <strong>{mismatch.streamer.streamerName}</strong>님은 {LINE_LABEL_KO[mismatch.line]} 라인 스트리머가
+            아닙니다.
+            <br />
+            그래도 등록하시겠습니까?
+          </p>
+          <div className={styles.modalActions}>
+            <button type="button" className={styles.modalConfirm} onClick={confirmMismatch}>
+              확인
+            </button>
+            <button type="button" className={styles.modalCancel} onClick={() => setMismatch(null)}>
+              취소
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {resultOpen && resultStep === 'name' && (
+        <Modal onClose={closeResultModal}>
+          <label className={styles.teamNameLabel}>
+            팀명
+            <input
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              placeholder="팀명을 입력하세요"
+              autoFocus
+            />
+          </label>
+          {teamNameError && <p className={styles.errorText}>{teamNameError}</p>}
+          <div className={styles.modalActions}>
+            <button type="button" className={styles.modalConfirm} onClick={handleConfirmTeamName}>
+              확인
+            </button>
+            <button type="button" className={styles.modalCancel} onClick={closeResultModal}>
+              취소
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {resultOpen && resultStep === 'result' && (
+        <Modal onClose={closeResultModal}>
+          <p className={styles.modalText}>
+            {!canBuild
+              ? '해당 팀은 구성이 불가능합니다.'
+              : saved
+                ? '팀이 저장되었습니다.'
+                : '해당 팀은 구성이 가능합니다. 저장하시겠습니까?'}
+          </p>
+          {saveError && <p className={styles.errorText}>{saveError}</p>}
+          <div className={styles.modalActions}>
+            <button
+              type="button"
+              className={styles.modalConfirm}
+              onClick={saved ? closeResultModal : handleConfirmResult}
+              disabled={saving}
+            >
+              {saving ? '저장 중...' : '확인'}
+            </button>
+            <button type="button" className={styles.modalCancel} onClick={closeResultModal} disabled={saving}>
+              취소
+            </button>
+          </div>
+        </Modal>
+      )}
+    </DndContext>
+  );
+}
