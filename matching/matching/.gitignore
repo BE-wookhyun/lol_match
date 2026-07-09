@@ -49,3 +49,5 @@ out/
 ### OS ###
 .DS_Store
 Thumbs.db
+
+docker-run.sh
