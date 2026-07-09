@@ -14,6 +14,8 @@ FROM eclipse-temurin:21-jre AS run
 WORKDIR /app
 
 COPY --from=build /app/build/libs/*-SNAPSHOT.jar app.jar
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["./entrypoint.sh"]
