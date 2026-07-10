@@ -1,0 +1,13 @@
+.git
+node_modules
+dist
+dist-ssr
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+*.log
+.vscode
+.idea
+README.md
