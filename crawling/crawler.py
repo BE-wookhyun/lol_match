@@ -26,7 +26,8 @@ def _load_full_html(url: str) -> str:
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--no-sandbox", "--disable-dev-shm-usage"])
         page = browser.new_page()
-        page.goto(url, wait_until="networkidle")
+        page.goto(url, wait_until="domcontentloaded")
+        page.wait_for_selector("div.bjInfo_wrap", timeout=60000)
 
         previous_count = -1
         stable_rounds = 0
