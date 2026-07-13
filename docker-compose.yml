@@ -10,18 +10,8 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       RIOT_API_KEY: ${RIOT_API_KEY}
-      CRAWLING_BASE_URL: http://crawling:8000
     volumes:
       - ./logs/backend:/app/logs
-    depends_on:
-      - crawling
-
-  crawling:
-    image: wookhyunkim/lol_match_crawling:${CRAWLING_TAG:-latest}
-    container_name: lol_match_crawling
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
 
   frontend:
     image: wookhyunkim/lol_match_frontend:${FRONTEND_TAG:-latest}

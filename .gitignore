@@ -27,6 +27,12 @@ logs/
 # Node (in case anything is run from the repo root)
 node_modules/
 
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
 # Misc archives / temp
 *.tmp
 *.bak
