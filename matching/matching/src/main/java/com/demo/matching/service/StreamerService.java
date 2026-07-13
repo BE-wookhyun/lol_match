@@ -3,10 +3,12 @@ package com.demo.matching.service;
 import com.demo.matching.domain.Line;
 import com.demo.matching.domain.LolDivision;
 import com.demo.matching.domain.LolTier;
+import com.demo.matching.domain.Score;
 import com.demo.matching.domain.Streamer;
 import com.demo.matching.domain.Tier;
 import com.demo.matching.dto.StreamerRegisterRequest;
 import com.demo.matching.dto.StreamerResponse;
+import com.demo.matching.repository.ScoreRepository;
 import com.demo.matching.repository.StreamerRepository;
 import com.demo.matching.repository.TierRepository;
 import com.demo.matching.riot.RiotAccountDto;
@@ -31,13 +33,16 @@ public class StreamerService {
 
     private final StreamerRepository streamerRepository;
     private final TierRepository tierRepository;
+    private final ScoreRepository scoreRepository;
     private final RiotApiService riotApiService;
     private final RiotProperties riotProperties;
 
     public StreamerService(StreamerRepository streamerRepository, TierRepository tierRepository,
-                            RiotApiService riotApiService, RiotProperties riotProperties) {
+                            ScoreRepository scoreRepository, RiotApiService riotApiService,
+                            RiotProperties riotProperties) {
         this.streamerRepository = streamerRepository;
         this.tierRepository = tierRepository;
+        this.scoreRepository = scoreRepository;
         this.riotApiService = riotApiService;
         this.riotProperties = riotProperties;
     }
@@ -79,14 +84,15 @@ public class StreamerService {
                 .build();
         tierRepository.save(tier);
 
-        return StreamerResponse.of(streamer, tier);
+        return StreamerResponse.of(streamer, tier, null);
     }
 
     public StreamerResponse findBySeq(Long seq) {
         Streamer streamer = streamerRepository.findById(seq)
                 .orElseThrow(() -> new StreamerNotFoundException(seq));
         Tier tier = tierRepository.findFirstByStreamerSeqOrderByFetchedAtDesc(seq).orElse(null);
-        return StreamerResponse.of(streamer, tier);
+        Score score = scoreRepository.findFirstByStreamerSeqOrderByFetchedAtDesc(seq).orElse(null);
+        return StreamerResponse.of(streamer, tier, score);
     }
 
     @Transactional
@@ -95,19 +101,28 @@ public class StreamerService {
             throw new StreamerNotFoundException(seq);
         }
         tierRepository.deleteByStreamerSeq(seq);
+        scoreRepository.deleteByStreamerSeq(seq);
         streamerRepository.deleteById(seq);
     }
 
     public List<StreamerResponse> findAll(LolTier tierFilter, Line lineFilter) {
         List<Streamer> streamers = streamerRepository.findAll();
 
+        List<Long> streamerSeqs = streamers.stream().map(Streamer::getSeq).toList();
+
         Map<Long, Tier> tierByStreamerSeq = tierRepository
-                .findByStreamerSeqIn(streamers.stream().map(Streamer::getSeq).toList())
+                .findByStreamerSeqIn(streamerSeqs)
                 .stream()
                 .collect(Collectors.toMap(Tier::getStreamerSeq, t -> t, (a, b) -> a));
 
+        Map<Long, Score> scoreByStreamerSeq = scoreRepository
+                .findByStreamerSeqIn(streamerSeqs)
+                .stream()
+                .collect(Collectors.toMap(Score::getStreamerSeq, s -> s, (a, b) -> a));
+
         return streamers.stream()
-                .map(streamer -> StreamerResponse.of(streamer, tierByStreamerSeq.get(streamer.getSeq())))
+                .map(streamer -> StreamerResponse.of(streamer, tierByStreamerSeq.get(streamer.getSeq()),
+                        scoreByStreamerSeq.get(streamer.getSeq())))
                 .filter(response -> tierFilter == null || tierFilter.equals(response.tier()))
                 .filter(response -> lineFilter == null || lineFilter.equals(response.line()))
                 .sorted(TIER_RANK_COMPARATOR)

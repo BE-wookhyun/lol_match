@@ -1,10 +1,10 @@
-import type { Line, TierName } from '../types';
-import { TIER_LABEL_KO, LINE_LABEL_KO } from '../constants/tiers';
-import { TIER_IMG, LINE_IMG } from '../constants/images';
+import type { Line } from '../types';
+import { LINE_LABEL_KO } from '../constants/tiers';
+import { LINE_IMG } from '../constants/images';
 import styles from './ShortcutBar.module.css';
 
 type ShortcutBarProps =
-  | { mode: 'tier'; items: TierName[] }
+  | { mode: 'tier'; items: string[] }
   | { mode: 'line'; items: Line[] };
 
 function scrollToSection(prefix: string, key: string) {
@@ -15,23 +15,39 @@ export default function ShortcutBar(props: ShortcutBarProps) {
   const { mode, items } = props;
   const prefix = mode === 'tier' ? 'tier' : 'line';
 
+  if (mode === 'tier') {
+    return (
+      <div className={styles.bar}>
+        <span className={styles.label}>바로가기</span>
+        <div className={styles.icons}>
+          {items.map((grade) => (
+            <button
+              key={grade}
+              type="button"
+              className={styles.textButton}
+              onClick={() => scrollToSection(prefix, grade)}
+            >
+              {grade}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.bar}>
       <span className={styles.label}>바로가기</span>
       <div className={styles.icons}>
-        {items.map((item) => (
+        {items.map((line) => (
           <button
-            key={item}
+            key={line}
             type="button"
             className={styles.iconButton}
-            title={mode === 'tier' ? TIER_LABEL_KO[item as TierName] : LINE_LABEL_KO[item as Line]}
-            onClick={() => scrollToSection(prefix, item)}
+            title={LINE_LABEL_KO[line]}
+            onClick={() => scrollToSection(prefix, line)}
           >
-            <img
-              className={styles.icon}
-              src={mode === 'tier' ? TIER_IMG[item as TierName] : LINE_IMG[item as Line]}
-              alt={mode === 'tier' ? TIER_LABEL_KO[item as TierName] : LINE_LABEL_KO[item as Line]}
-            />
+            <img className={styles.icon} src={LINE_IMG[line]} alt={LINE_LABEL_KO[line]} />
           </button>
         ))}
       </div>

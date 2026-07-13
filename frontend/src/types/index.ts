@@ -25,6 +25,8 @@ export interface Streamer {
   division?: Division;
   lp: number;
   isLive?: boolean;
+  peakTier?: string;
+  score?: number;
 }
 
 export type TeamLineup = Partial<Record<Line, number>>;

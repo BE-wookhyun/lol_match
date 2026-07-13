@@ -5,7 +5,7 @@ import LineSection from '../components/LineSection';
 import ViewToggle from '../components/ViewToggle';
 import StreamerRegisterModal from '../components/StreamerRegisterModal';
 import { deleteStreamer, fetchStreamers } from '../api/streamers';
-import { LINE_ORDER, TIER_ORDER } from '../constants/tiers';
+import { GRADE_ORDER, LINE_ORDER } from '../constants/tiers';
 import type { Streamer } from '../types';
 import styles from './TierDatabasePage.module.css';
 
@@ -36,9 +36,9 @@ export default function TierDatabasePage() {
   }
 
   const byTier = useMemo(() => {
-    return TIER_ORDER.map((tier) => ({
-      tier,
-      list: streamers.filter((s) => s.tier === tier),
+    return GRADE_ORDER.map((grade) => ({
+      grade,
+      list: streamers.filter((s) => s.peakTier === grade),
     })).filter((group) => group.list.length > 0);
   }, [streamers]);
 
@@ -52,7 +52,7 @@ export default function TierDatabasePage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1 className={styles.title}>SOOP 멸망전 스트리머 롤 티어 데이터베이스</h1>
+        <h1 className={styles.title}>SOOP 멸망전 스트리머 등급 데이터베이스</h1>
         <button type="button" className={styles.registerButton} onClick={() => setShowRegisterModal(true)}>
           DB 등록하기
         </button>
@@ -66,7 +66,7 @@ export default function TierDatabasePage() {
           <div className={styles.toolbar}>
             <ViewToggle value={groupBy} onChange={setGroupBy} />
             {groupBy === 'tier' ? (
-              <ShortcutBar mode="tier" items={byTier.map((g) => g.tier)} />
+              <ShortcutBar mode="tier" items={byTier.map((g) => g.grade)} />
             ) : (
               <ShortcutBar mode="line" items={byLine.map((g) => g.line)} />
             )}
@@ -75,8 +75,8 @@ export default function TierDatabasePage() {
           {groupBy === 'tier'
             ? byTier.map((group) => (
                 <TierSection
-                  key={group.tier}
-                  tier={group.tier}
+                  key={group.grade}
+                  grade={group.grade}
                   streamers={group.list}
                   onDeleteStreamer={handleDeleteStreamer}
                 />
