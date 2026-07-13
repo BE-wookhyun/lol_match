@@ -36,3 +36,6 @@ venv/
 # Misc archives / temp
 *.tmp
 *.bak
+
+# Contains DB connection commands - keep local only
+docs/server_db.md
