@@ -1,23 +1,18 @@
-import type { Streamer, TierName } from '../types';
-import { TIER_LABEL_KO } from '../constants/tiers';
-import { TIER_IMG } from '../constants/images';
+import type { Streamer } from '../types';
 import StreamerCard from './StreamerCard';
 import styles from './TierSection.module.css';
 
 interface TierSectionProps {
-  tier: TierName;
+  grade: string;
   streamers: Streamer[];
   onDeleteStreamer?: (streamer: Streamer) => void;
 }
 
-export default function TierSection({ tier, streamers, onDeleteStreamer }: TierSectionProps) {
+export default function TierSection({ grade, streamers, onDeleteStreamer }: TierSectionProps) {
   return (
-    <section id={`tier-${tier}`} className={styles.section} data-tier={tier}>
+    <section id={`tier-${grade}`} className={styles.section} data-tier={grade}>
       <header className={styles.header}>
-        <h2 className={styles.title}>
-          {TIER_LABEL_KO[tier]} 티어
-          <img className={styles.icon} src={TIER_IMG[tier]} alt={TIER_LABEL_KO[tier]} />
-        </h2>
+        <h2 className={styles.title}>{grade}</h2>
         <span className={styles.count}>{streamers.length}명</span>
       </header>
       <div className={styles.grid}>

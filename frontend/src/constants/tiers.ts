@@ -52,6 +52,12 @@ export const TIER_BG_VAR: Record<TierName, string> = {
   IRON: '--tier-iron-bg',
 };
 
+export const GRADE_ORDER: string[] = [
+  'Transcended', 'God', 'Legendary', 'Unique', 'SSR', 'SR', 'R',
+  'S+', 'S', 'S-', 'A+', 'A', 'A-', 'B+', 'B', 'B-',
+  'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E+', 'E', 'E-', 'F+', 'F', 'F-',
+];
+
 export const LINE_ORDER: Line[] = ['TOP', 'JGL', 'MID', 'BOT', 'SPT'];
 
 export const LINE_LABEL_KO: Record<Line, string> = {

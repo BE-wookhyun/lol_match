@@ -55,6 +55,10 @@ export default function StreamerCard({ streamer, draggableProps, onDelete }: Str
             <dd>{LINE_LABEL_KO[streamer.line]}</dd>
             <dt>랭크</dt>
             <dd>{formatRank(streamer.tier, streamer.division, streamer.lp)}</dd>
+            <dt>멸망전</dt>
+            <dd>
+              {streamer.peakTier ? `${streamer.peakTier} (${streamer.score ?? '-'}점)` : '미집계'}
+            </dd>
           </dl>
         </div>
       )}

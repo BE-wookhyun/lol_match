@@ -3,8 +3,10 @@ package com.demo.matching.dto;
 import com.demo.matching.domain.Line;
 import com.demo.matching.domain.LolDivision;
 import com.demo.matching.domain.LolTier;
+import com.demo.matching.domain.Score;
 import com.demo.matching.domain.Streamer;
 import com.demo.matching.domain.Tier;
+import java.math.BigDecimal;
 
 public record StreamerResponse(
         Long seq,
@@ -15,9 +17,11 @@ public record StreamerResponse(
         Line line,
         LolTier tier,
         LolDivision division,
-        Integer lp
+        Integer lp,
+        String peakTier,
+        BigDecimal score
 ) {
-    public static StreamerResponse of(Streamer streamer, Tier tier) {
+    public static StreamerResponse of(Streamer streamer, Tier tier, Score score) {
         return new StreamerResponse(
                 streamer.getSeq(),
                 streamer.getStreamerName(),
@@ -27,7 +31,9 @@ public record StreamerResponse(
                 streamer.getLine(),
                 tier == null ? null : tier.getLolTier(),
                 tier == null ? null : tier.getLolRank(),
-                tier == null ? null : tier.getLp()
+                tier == null ? null : tier.getLp(),
+                score == null ? null : score.getPeakTier(),
+                score == null ? null : score.getScore()
         );
     }
 }
