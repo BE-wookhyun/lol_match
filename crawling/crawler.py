@@ -10,6 +10,7 @@ POSITION_MAP = {
     "jungle": "JGL",
     "mid": "MID",
     "adc": "BOT",
+    "spt": "SPT",
     "support": "SPT",
 }
 
@@ -28,13 +29,20 @@ def _load_full_html(url: str) -> str:
         page.goto(url, wait_until="networkidle")
 
         previous_count = -1
-        while True:
+        stable_rounds = 0
+        for _ in range(100):
             cards = page.query_selector_all("div.bjInfo_wrap")
-            if len(cards) == previous_count:
-                break
-            previous_count = len(cards)
-            page.mouse.wheel(0, 3000)
-            page.wait_for_timeout(1000)
+            count = len(cards)
+            if count == previous_count:
+                stable_rounds += 1
+                if stable_rounds >= 3:
+                    break
+            else:
+                stable_rounds = 0
+            previous_count = count
+            if cards:
+                cards[-1].scroll_into_view_if_needed()
+            page.wait_for_timeout(1500)
 
         html = page.content()
         browser.close()
