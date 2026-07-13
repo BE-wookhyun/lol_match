@@ -4,7 +4,7 @@ import TierSection from '../components/TierSection';
 import LineSection from '../components/LineSection';
 import ViewToggle from '../components/ViewToggle';
 import StreamerRegisterModal from '../components/StreamerRegisterModal';
-import { crawlStreamers, deleteStreamer, fetchStreamers } from '../api/streamers';
+import { deleteStreamer, fetchStreamers } from '../api/streamers';
 import { GRADE_ORDER, LINE_ORDER } from '../constants/tiers';
 import type { Streamer } from '../types';
 import styles from './TierDatabasePage.module.css';
@@ -15,7 +15,6 @@ export default function TierDatabasePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const [crawling, setCrawling] = useState(false);
 
   function loadStreamers() {
     setLoading(true);
@@ -29,15 +28,6 @@ export default function TierDatabasePage() {
   useEffect(() => {
     loadStreamers();
   }, []);
-
-  function handleCrawl() {
-    setCrawling(true);
-    setError(null);
-    crawlStreamers()
-      .then(() => loadStreamers())
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setCrawling(false));
-  }
 
   function handleDeleteStreamer(streamer: Streamer) {
     deleteStreamer(streamer.seq)
@@ -63,14 +53,9 @@ export default function TierDatabasePage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>SOOP 멸망전 스트리머 등급 데이터베이스</h1>
-        <div className={styles.headerActions}>
-          <button type="button" className={styles.registerButton} onClick={handleCrawl} disabled={crawling}>
-            {crawling ? 'DB 최신화 중... (1~2분 소요)' : 'DB 최신화'}
-          </button>
-          <button type="button" className={styles.registerButton} onClick={() => setShowRegisterModal(true)}>
-            DB 등록하기
-          </button>
-        </div>
+        <button type="button" className={styles.registerButton} onClick={() => setShowRegisterModal(true)}>
+          DB 등록하기
+        </button>
       </div>
 
       {loading && <p>불러오는 중...</p>}

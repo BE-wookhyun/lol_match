@@ -19,15 +19,9 @@
   text-align: center;
 }
 
-.headerActions {
+.registerButton {
   position: absolute;
   right: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.registerButton {
   padding: 8px 16px;
   border-radius: var(--radius-sm);
   font-size: 14px;
@@ -35,12 +29,6 @@
   border: 1px solid var(--color-primary);
   background: var(--color-primary);
   color: #fff;
-  white-space: nowrap;
-}
-
-.registerButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .toolbar {
