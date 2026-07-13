@@ -66,4 +66,11 @@ public class Streamer {
     private void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+    public void updateFromCrawl(String streamerName, String lolId, String lolTag, Line line) {
+        this.streamerName = streamerName;
+        this.lolId = lolId;
+        this.lolTag = lolTag;
+        this.line = line;
+    }
 }

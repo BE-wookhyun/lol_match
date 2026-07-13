@@ -12,6 +12,11 @@ docker run -d \
   -p 5173:80 \
   wookhyunkim/lol_match_frontend:latest
 
+docker run -d \
+  --name lol_match_crawling \
+  -p 8000:8000 \
+  wookhyunkim/lol_match_crawling:latest
+
 # ---- docker compose (recommended: pins both images to a specific CI build) ----
 # Each push to main is tagged both `latest` and `sha-<short-hash>` by CI.
 # Pin to the sha tag so a deploy always uses a known, reproducible build,
@@ -26,8 +31,8 @@ docker run -d \
 # or check the tag printed by the `build-and-push` job in GitHub Actions,
 # or look it up directly at hub.docker.com/r/wookhyunkim/lol_match_backend/tags.
 #
-#   BACKEND_TAG=sha-abc1234 FRONTEND_TAG=sha-def5678 docker compose up -d
+#   BACKEND_TAG=sha-abc1234 FRONTEND_TAG=sha-def5678 CRAWLING_TAG=sha-ghi9012 docker compose up -d
 #
-# Omitting BACKEND_TAG/FRONTEND_TAG falls back to `latest`.
+# Omitting BACKEND_TAG/FRONTEND_TAG/CRAWLING_TAG falls back to `latest`.
 docker compose pull
-BACKEND_TAG=sha-abc1234 FRONTEND_TAG=sha-def5678 docker compose up -d
+BACKEND_TAG=sha-abc1234 FRONTEND_TAG=sha-def5678 CRAWLING_TAG=sha-ghi9012 docker compose up -d
