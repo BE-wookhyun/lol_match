@@ -4,6 +4,7 @@ import com.demo.matching.domain.Line;
 import com.demo.matching.domain.LolTier;
 import com.demo.matching.dto.StreamerRegisterRequest;
 import com.demo.matching.dto.StreamerResponse;
+import com.demo.matching.service.FaCrawlSyncService;
 import com.demo.matching.service.StreamerService;
 import jakarta.validation.Valid;
 import java.util.LinkedHashMap;
@@ -26,15 +27,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class StreamerController {
 
     private final StreamerService streamerService;
+    private final FaCrawlSyncService faCrawlSyncService;
 
-    public StreamerController(StreamerService streamerService) {
+    public StreamerController(StreamerService streamerService, FaCrawlSyncService faCrawlSyncService) {
         this.streamerService = streamerService;
+        this.faCrawlSyncService = faCrawlSyncService;
     }
 
     @PostMapping
     public ResponseEntity<StreamerResponse> register(@Valid @RequestBody StreamerRegisterRequest request) {
         StreamerResponse response = streamerService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/crawl")
+    public ResponseEntity<Map<String, Integer>> crawl() {
+        int count = faCrawlSyncService.syncFaList();
+        return ResponseEntity.ok(Map.of("count", count));
     }
 
     @GetMapping("/{seq}")

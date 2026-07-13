@@ -32,15 +32,18 @@ public class FaCrawlSyncService {
     }
 
     @Transactional
-    public void syncFaList() {
+    public int syncFaList() {
         String season = crawlingProperties.getSeason();
+        int successCount = 0;
         for (FaEntryDto entry : crawlingApiService.fetchFaList(season)) {
             try {
                 syncEntry(entry, season);
+                successCount++;
             } catch (Exception e) {
                 log.warn("FA 항목 저장 실패: streamerId={}, message={}", entry.streamerId(), e.getMessage());
             }
         }
+        return successCount;
     }
 
     private void syncEntry(FaEntryDto entry, String season) {
