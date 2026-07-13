@@ -51,3 +51,16 @@ export async function deleteStreamer(seq: number): Promise<void> {
     throw new Error(await readErrorMessage(res, `삭제에 실패했습니다. (${res.status})`));
   }
 }
+
+export async function crawlStreamers(): Promise<number> {
+  const res = await fetch(`${API_BASE_URL}/api/streamers/crawl`, {
+    method: 'POST',
+  });
+
+  if (!res.ok) {
+    throw new Error(await readErrorMessage(res, `DB 최신화에 실패했습니다. (${res.status})`));
+  }
+
+  const body = await res.json();
+  return body.count as number;
+}

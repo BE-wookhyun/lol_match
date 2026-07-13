@@ -24,7 +24,7 @@ GRADE_MAP = {grade.lower(): grade for grade in GRADE_ORDER}
 
 def _load_full_html(url: str) -> str:
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(args=["--no-sandbox", "--disable-dev-shm-usage"])
         page = browser.new_page()
         page.goto(url, wait_until="networkidle")
 
@@ -41,7 +41,7 @@ def _load_full_html(url: str) -> str:
                 stable_rounds = 0
             previous_count = count
             if cards:
-                cards[-1].scroll_into_view_if_needed()
+                cards[-1].evaluate("el => el.scrollIntoView({block: 'end'})")
             page.wait_for_timeout(1500)
 
         html = page.content()
