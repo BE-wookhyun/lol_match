@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core';
 import { toPng } from 'html-to-image';
 import DraggableStreamerCard from '../components/DraggableStreamerCard';
+import StreamerCard from '../components/StreamerCard';
 import LineupTable from '../components/LineupTable';
 import Modal from '../components/Modal';
 import { fetchStreamers } from '../api/streamers';
@@ -9,6 +18,8 @@ import { createTeam } from '../api/teams';
 import { LINE_ORDER, LINE_LABEL_KO, TIER_ORDER, TIER_LABEL_KO } from '../constants/tiers';
 import type { Line, Streamer, TeamLineup, TierName } from '../types';
 import styles from './TeamBuildPage.module.css';
+
+const MAX_TOTAL_SCORE = 182;
 
 export default function TeamBuildPage() {
   const [streamers, setStreamers] = useState<Streamer[]>([]);
@@ -24,6 +35,7 @@ export default function TeamBuildPage() {
   const [captainError, setCaptainError] = useState('');
 
   const [lineup, setLineup] = useState<TeamLineup>({});
+  const [activeStreamer, setActiveStreamer] = useState<Streamer | null>(null);
   const [mismatch, setMismatch] = useState<{ line: Line; streamer: Streamer } | null>(null);
   const [resultOpen, setResultOpen] = useState(false);
   const [resultStep, setResultStep] = useState<'name' | 'result'>('name');
@@ -61,8 +73,20 @@ export default function TeamBuildPage() {
     });
   }, [streamers, lineFilter, tierFilter, assignedSeqs]);
 
+  const totalScore = useMemo(() => {
+    return LINE_ORDER.reduce((sum, line) => {
+      const streamer = resolveStreamer(lineup[line]);
+      return sum + (streamer?.score ?? 0);
+    }, 0);
+  }, [lineup, streamers]);
+
+  const isOverScoreLimit = totalScore > MAX_TOTAL_SCORE;
+
   const canBuild =
-    teamName.trim() !== '' && captain !== null && LINE_ORDER.every((line) => lineup[line] !== undefined);
+    teamName.trim() !== '' &&
+    captain !== null &&
+    LINE_ORDER.every((line) => lineup[line] !== undefined) &&
+    !isOverScoreLimit;
 
   function handleCaptainConfirm() {
     const found = streamers.find((s) => s.streamerName === captainInput.trim());
@@ -76,7 +100,13 @@ export default function TeamBuildPage() {
     setLineup((prev) => ({ ...prev, [found.line]: found.seq }));
   }
 
+  function handleDragStart(event: DragStartEvent) {
+    const streamer = event.active.data.current?.streamer as Streamer | undefined;
+    setActiveStreamer(streamer ?? null);
+  }
+
   function handleDragEnd(event: DragEndEvent) {
+    setActiveStreamer(null);
     const { active, over } = event;
     if (!over) return;
     const line = over.data.current?.line as Line | undefined;
@@ -168,7 +198,7 @@ export default function TeamBuildPage() {
   }
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className={styles.page}>
         <h1 className={styles.title}>팀 구성하기</h1>
 
@@ -232,6 +262,11 @@ export default function TeamBuildPage() {
               <LineupTable lineup={lineup} resolveStreamer={resolveStreamer} editable onRemove={handleRemove} />
             </div>
 
+            <p className={isOverScoreLimit ? styles.errorText : undefined}>
+              합산 점수: {totalScore}점 / {MAX_TOTAL_SCORE}점
+              {isOverScoreLimit && ` (초과로 팀 구성이 불가합니다)`}
+            </p>
+
             <div className={styles.buildActions}>
               <button type="button" className={styles.buildButton} onClick={openResultModal}>
                 팀 빌드
@@ -243,6 +278,8 @@ export default function TeamBuildPage() {
           </section>
         </div>
       </div>
+
+      <DragOverlay>{activeStreamer && <StreamerCard streamer={activeStreamer} />}</DragOverlay>
 
       {mismatch && (
         <Modal onClose={() => setMismatch(null)}>
@@ -289,11 +326,13 @@ export default function TeamBuildPage() {
       {resultOpen && resultStep === 'result' && (
         <Modal onClose={closeResultModal}>
           <p className={styles.modalText}>
-            {!canBuild
-              ? '해당 팀은 구성이 불가능합니다.'
-              : saved
-                ? '팀이 저장되었습니다.'
-                : '해당 팀은 구성이 가능합니다. 저장하시겠습니까?'}
+            {isOverScoreLimit
+              ? `합산 점수가 ${MAX_TOTAL_SCORE}점을 초과하여 팀 구성이 불가능합니다.`
+              : !canBuild
+                ? '해당 팀은 구성이 불가능합니다.'
+                : saved
+                  ? '팀이 저장되었습니다.'
+                  : '해당 팀은 구성이 가능합니다. 저장하시겠습니까?'}
           </p>
           {saveError && <p className={styles.errorText}>{saveError}</p>}
           <div className={styles.modalActions}>

@@ -7,19 +7,12 @@ interface DraggableStreamerCardProps {
 }
 
 export default function DraggableStreamerCard({ streamer }: DraggableStreamerCardProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `pool-${streamer.seq}`,
     data: { streamer },
   });
 
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        zIndex: isDragging ? 50 : undefined,
-        opacity: isDragging ? 0.4 : 1,
-        position: 'relative' as const,
-      }
-    : undefined;
+  const style = { opacity: isDragging ? 0.4 : 1 };
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
