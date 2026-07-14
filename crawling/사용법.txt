@@ -1,0 +1,7 @@
+source .venv/bin/activate
+
+# 크롤링
+python3 crawler.py
+
+# db 동기화
+python3 sync_to_db.py

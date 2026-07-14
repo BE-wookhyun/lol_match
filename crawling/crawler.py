@@ -97,5 +97,10 @@ if __name__ == "__main__":
     season = sys.argv[1] if len(sys.argv) > 1 else "27"
     entries = fetch_fa_list(season)
     print(f"{len(entries)}건 수집됨")
-    for entry in entries:
-        print(entry)
+    for i, entry in enumerate(entries, 1):
+        adjustment = f" (조정 {entry.score_adjustment:+.1f})" if entry.score_adjustment is not None else ""
+        print(
+            f"[{i}] {entry.streamer_name}({entry.streamer_id}) - {entry.position} "
+            f"{entry.lol_id}#{entry.lol_tag} | 티어: {entry.peak_tier} | "
+            f"점수: {entry.score:.1f}{adjustment}"
+        )

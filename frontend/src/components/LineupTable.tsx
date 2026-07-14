@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
 import type { Line, Streamer, TeamLineup } from '../types';
-import { LINE_ORDER, LINE_LABEL_KO, formatRank } from '../constants/tiers';
+import { LINE_ORDER, LINE_LABEL_KO } from '../constants/tiers';
 import styles from './LineupTable.module.css';
 
 interface LineupTableProps {
@@ -34,7 +34,7 @@ function SlotRow({
         <>
           <span className={styles.name}>{streamer.streamerName}</span>
           <span className={styles.lolId}>{streamer.lolId}#{streamer.lolTag}</span>
-          <span className={styles.tier}>{formatRank(streamer.tier, streamer.division, streamer.lp)}</span>
+          <span className={styles.tier}>{streamer.score !== undefined ? `${streamer.score}점` : '-'}</span>
           {editable && onRemove && (
             <button type="button" className={styles.removeButton} onClick={() => onRemove(line)}>
               ✕
