@@ -75,10 +75,10 @@ export interface TeamMatchResultPayload {
   losses: number;
 }
 
-export async function recordTeamMatchResult(payload: TeamMatchResultPayload): Promise<void> {
+export async function recordTeamMatchResult(payload: TeamMatchResultPayload, adminKey: string): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/api/teams/match-results`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
     body: JSON.stringify(payload),
   });
 

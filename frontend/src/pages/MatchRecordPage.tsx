@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import LineupTable from '../components/LineupTable';
-import { fetchTeams, type TeamCreateResponse } from '../api/teams';
+import MatchResultModal from '../components/MatchResultModal';
+import { fetchTeams, recordTeamMatchResult, type TeamCreateResponse, type TeamMatchResultPayload } from '../api/teams';
 import { fetchStreamers } from '../api/streamers';
 import { toLineupSeqs } from '../utils/lineup';
 import type { Streamer } from '../types';
@@ -45,6 +46,7 @@ export default function MatchRecordPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [teamFilter, setTeamFilter] = useState<string | 'ALL'>('ALL');
+  const [showMatchResultModal, setShowMatchResultModal] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -58,6 +60,13 @@ export default function MatchRecordPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  async function handleConfirmMatchResult(payload: TeamMatchResultPayload, adminKey: string) {
+    await recordTeamMatchResult(payload, adminKey);
+    const teamsRes = await fetchTeams();
+    setTeams(teamsRes);
+    setShowMatchResultModal(false);
+  }
+
   const matches = useMemo(() => buildMatches(teams), [teams]);
 
   const filteredMatches = useMemo(() => {
@@ -68,6 +77,12 @@ export default function MatchRecordPage() {
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>대결 기록</h1>
+
+      <div className={styles.adminBar}>
+        <button type="button" className={styles.adminButton} onClick={() => setShowMatchResultModal(true)}>
+          전적 입력 (관리자)
+        </button>
+      </div>
 
       {loading && <p>불러오는 중...</p>}
       {error && <p className={styles.empty}>{error}</p>}
@@ -117,6 +132,14 @@ export default function MatchRecordPage() {
             {filteredMatches.length === 0 && <p className={styles.empty}>해당 팀의 대결 기록이 없습니다.</p>}
           </div>
         </>
+      )}
+
+      {showMatchResultModal && (
+        <MatchResultModal
+          teams={teams}
+          onConfirm={handleConfirmMatchResult}
+          onClose={() => setShowMatchResultModal(false)}
+        />
       )}
     </div>
   );
