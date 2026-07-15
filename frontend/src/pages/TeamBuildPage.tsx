@@ -13,9 +13,11 @@ import DraggableStreamerCard from '../components/DraggableStreamerCard';
 import StreamerCard from '../components/StreamerCard';
 import LineupTable from '../components/LineupTable';
 import Modal from '../components/Modal';
+import RecommendModal from '../components/RecommendModal';
 import { fetchStreamers } from '../api/streamers';
 import { createTeam } from '../api/teams';
 import { LINE_ORDER, LINE_LABEL_KO, TIER_ORDER, TIER_LABEL_KO } from '../constants/tiers';
+import { recommendCombos, recommendSingleLine, type StreamerCombo } from '../utils/recommend';
 import type { Line, Streamer, TeamLineup, TierName } from '../types';
 import styles from './TeamBuildPage.module.css';
 
@@ -28,6 +30,7 @@ export default function TeamBuildPage() {
 
   const [lineFilter, setLineFilter] = useState<Line | 'ALL'>('ALL');
   const [tierFilter, setTierFilter] = useState<TierName | 'ALL' | 'UNRANKED'>('ALL');
+  const [scoreFilter, setScoreFilter] = useState<number | 'ALL'>('ALL');
 
   const [teamName, setTeamName] = useState('');
   const [captainInput, setCaptainInput] = useState('');
@@ -43,6 +46,10 @@ export default function TeamBuildPage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saved, setSaved] = useState(false);
+
+  const [recommendOpen, setRecommendOpen] = useState(false);
+  const [recommendSingle, setRecommendSingle] = useState<Streamer[] | null>(null);
+  const [recommendCombosResult, setRecommendCombosResult] = useState<StreamerCombo[] | null>(null);
 
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -64,15 +71,30 @@ export default function TeamBuildPage() {
 
   const assignedSeqs = useMemo(() => new Set(Object.values(lineup)), [lineup]);
 
+  const scoreBuckets = useMemo(() => {
+    const maxScore = streamers.reduce((max, s) => Math.max(max, s.score ?? 0), 0);
+    const bucketCount = Math.max(1, Math.ceil(maxScore / 10));
+    return Array.from({ length: bucketCount }, (_, i) => {
+      const min = i === 0 ? 0 : i * 10 + 1;
+      const max = (i + 1) * 10;
+      return { min, max, label: `${min}~${max}` };
+    });
+  }, [streamers]);
+
   const pool = useMemo(() => {
     return streamers.filter((s) => {
       if (assignedSeqs.has(s.seq)) return false;
       if (lineFilter !== 'ALL' && s.line !== lineFilter) return false;
       if (tierFilter === 'UNRANKED' && s.tier) return false;
       if (tierFilter !== 'ALL' && tierFilter !== 'UNRANKED' && s.tier !== tierFilter) return false;
+      if (scoreFilter !== 'ALL') {
+        const bucket = scoreBuckets[scoreFilter];
+        const score = s.score ?? 0;
+        if (!bucket || score < bucket.min || score > bucket.max) return false;
+      }
       return true;
     });
-  }, [streamers, lineFilter, tierFilter, assignedSeqs]);
+  }, [streamers, lineFilter, tierFilter, scoreFilter, scoreBuckets, assignedSeqs]);
 
   const totalScore = useMemo(() => {
     return LINE_ORDER.reduce((sum, line) => {
@@ -82,6 +104,11 @@ export default function TeamBuildPage() {
   }, [lineup, streamers]);
 
   const isOverScoreLimit = totalScore > MAX_TOTAL_SCORE;
+  const remainingScore = MAX_TOTAL_SCORE - totalScore;
+  const remainingLines = useMemo(
+    () => LINE_ORDER.filter((line) => lineup[line] === undefined),
+    [lineup]
+  );
 
   const canBuild =
     teamName.trim() !== '' &&
@@ -133,6 +160,42 @@ export default function TeamBuildPage() {
       delete next[line];
       return next;
     });
+  }
+
+  function openRecommendModal() {
+    if (remainingLines.length === 0) return;
+
+    if (remainingLines.length === 1) {
+      setRecommendSingle(recommendSingleLine(streamers, assignedSeqs, remainingLines[0], remainingScore));
+      setRecommendCombosResult(null);
+    } else {
+      setRecommendCombosResult(recommendCombos(streamers, assignedSeqs, remainingLines, remainingScore));
+      setRecommendSingle(null);
+    }
+    setRecommendOpen(true);
+  }
+
+  function closeRecommendModal() {
+    setRecommendOpen(false);
+    setRecommendSingle(null);
+    setRecommendCombosResult(null);
+  }
+
+  function handleSelectSingleRecommendation(streamer: Streamer) {
+    setLineup((prev) => ({ ...prev, [streamer.line]: streamer.seq }));
+    closeRecommendModal();
+  }
+
+  function handleSelectComboRecommendation(combo: StreamerCombo) {
+    setLineup((prev) => {
+      const next = { ...prev };
+      for (const line of remainingLines) {
+        const streamer = combo.picks[line];
+        if (streamer) next[line] = streamer.seq;
+      }
+      return next;
+    });
+    closeRecommendModal();
   }
 
   function openResultModal() {
@@ -235,6 +298,20 @@ export default function TeamBuildPage() {
                   <option value="UNRANKED">언랭</option>
                 </select>
               </label>
+              <label className={styles.filterLabel}>
+                점수
+                <select
+                  value={scoreFilter}
+                  onChange={(e) => setScoreFilter(e.target.value === 'ALL' ? 'ALL' : Number(e.target.value))}
+                >
+                  <option value="ALL">전체</option>
+                  {scoreBuckets.map((bucket, i) => (
+                    <option key={i} value={i}>
+                      {bucket.label}점
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
 
             <div className={styles.pool}>
@@ -271,6 +348,14 @@ export default function TeamBuildPage() {
               합산 점수: {totalScore}점 / {MAX_TOTAL_SCORE}점
               {isOverScoreLimit && ` (초과로 팀 구성이 불가합니다)`}
             </p>
+            {remainingLines.length > 0 && (
+              <p className={styles.remainingRow}>
+                남은 점수: {remainingScore}점
+                <button type="button" className={styles.recommendButton} onClick={openRecommendModal}>
+                  추천 스트리머
+                </button>
+              </p>
+            )}
 
             <div className={styles.buildActions}>
               <button type="button" className={styles.buildButton} onClick={openResultModal}>
@@ -354,6 +439,18 @@ export default function TeamBuildPage() {
             </button>
           </div>
         </Modal>
+      )}
+
+      {recommendOpen && (
+        <RecommendModal
+          remainingLines={remainingLines}
+          remainingScore={remainingScore}
+          singleCandidates={recommendSingle}
+          combos={recommendCombosResult}
+          onSelectSingle={handleSelectSingleRecommendation}
+          onSelectCombo={handleSelectComboRecommendation}
+          onClose={closeRecommendModal}
+        />
       )}
     </DndContext>
   );
