@@ -107,14 +107,15 @@ def sync_to_db(season: str) -> int:
                     streamer_seq = _upsert_streamer(cur, entry)
                     _upsert_score(cur, streamer_seq, entry, season)
 
+                    riot_id = f"{entry.streamer_id}({entry.lol_id}#{entry.lol_tag})"
                     try:
                         rank_entry = fetch_solo_rank(entry.lol_id, entry.lol_tag)
                     except RiotApiError as e:
                         rank_entry = None
-                        print(f"{entry.streamer_id} 랭크 조회 실패: {e}")
+                        print(f"{riot_id} 랭크 조회 실패: {e}")
 
                     if rank_entry is None:
-                        print(f"{entry.streamer_id} 솔로랭크 정보 없음 (언랭 또는 조회 실패)")
+                        print(f"{riot_id} 솔로랭크 정보 없음 (언랭 또는 조회 실패)")
                     else:
                         _upsert_tier(
                             cur, streamer_seq,
