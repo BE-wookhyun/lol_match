@@ -21,9 +21,9 @@ export interface Streamer {
   lolId: string;
   lolTag: string;
   line: Line;
-  tier: TierName;
+  tier: TierName | null;
   division?: Division;
-  lp: number;
+  lp: number | null;
   isLive?: boolean;
   peakTier?: string;
   score?: number;

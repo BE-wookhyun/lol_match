@@ -27,7 +27,7 @@ export default function TeamBuildPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [lineFilter, setLineFilter] = useState<Line | 'ALL'>('ALL');
-  const [tierFilter, setTierFilter] = useState<TierName | 'ALL'>('ALL');
+  const [tierFilter, setTierFilter] = useState<TierName | 'ALL' | 'UNRANKED'>('ALL');
 
   const [teamName, setTeamName] = useState('');
   const [captainInput, setCaptainInput] = useState('');
@@ -68,7 +68,8 @@ export default function TeamBuildPage() {
     return streamers.filter((s) => {
       if (assignedSeqs.has(s.seq)) return false;
       if (lineFilter !== 'ALL' && s.line !== lineFilter) return false;
-      if (tierFilter !== 'ALL' && s.tier !== tierFilter) return false;
+      if (tierFilter === 'UNRANKED' && s.tier) return false;
+      if (tierFilter !== 'ALL' && tierFilter !== 'UNRANKED' && s.tier !== tierFilter) return false;
       return true;
     });
   }, [streamers, lineFilter, tierFilter, assignedSeqs]);
@@ -221,13 +222,17 @@ export default function TeamBuildPage() {
               </label>
               <label className={styles.filterLabel}>
                 티어
-                <select value={tierFilter} onChange={(e) => setTierFilter(e.target.value as TierName | 'ALL')}>
+                <select
+                  value={tierFilter}
+                  onChange={(e) => setTierFilter(e.target.value as TierName | 'ALL' | 'UNRANKED')}
+                >
                   <option value="ALL">전체</option>
                   {TIER_ORDER.map((tier) => (
                     <option key={tier} value={tier}>
                       {TIER_LABEL_KO[tier]}
                     </option>
                   ))}
+                  <option value="UNRANKED">언랭</option>
                 </select>
               </label>
             </div>
