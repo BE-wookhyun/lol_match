@@ -60,6 +60,8 @@ export const GRADE_ORDER: string[] = [
 
 export const LINE_ORDER: Line[] = ['TOP', 'JGL', 'MID', 'BOT', 'SPT'];
 
+export const LINE_PRIORITY_ORDER: Line[] = ['JGL', 'MID', 'BOT', 'TOP', 'SPT'];
+
 export const LINE_LABEL_KO: Record<Line, string> = {
   TOP: '탑',
   JGL: '정글',
