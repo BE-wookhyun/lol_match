@@ -68,10 +68,17 @@ export const LINE_LABEL_KO: Record<Line, string> = {
   SPT: '서포터',
 };
 
-export function formatRank(tier: TierName, division: string | undefined, lp: number): string {
+export function formatRank(
+  tier: TierName | null | undefined,
+  division: string | undefined,
+  lp: number | null | undefined
+): string {
+  if (!tier) {
+    return '언랭';
+  }
   const hasNoDivision = tier === 'CHALLENGER' || tier === 'GRANDMASTER' || tier === 'MASTER';
   if (hasNoDivision) {
-    return `${TIER_LABEL_KO[tier]} ${lp}`;
+    return `${TIER_LABEL_KO[tier]} ${lp ?? 0}`;
   }
   return `${TIER_LABEL_KO[tier]} ${division ?? ''}`.trim();
 }
