@@ -1,0 +1,60 @@
+.message {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: left;
+}
+
+.label input {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+}
+
+.error {
+  font-size: 12.5px;
+  color: var(--color-accent);
+  margin: 10px 0 0;
+  text-align: left;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirm,
+.cancel {
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+}
+
+.confirm {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+
+.confirm:disabled,
+.cancel:disabled {
+  opacity: 0.6;
+}
+
+.cancel {
+  background: var(--color-surface);
+  color: var(--color-text);
+}

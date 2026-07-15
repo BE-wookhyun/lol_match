@@ -8,6 +8,7 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       RIOT_API_KEY: ${RIOT_API_KEY}
+      ADMIN_API_KEY: ${ADMIN_API_KEY}
     volumes:
       - ./logs/backend:/app/logs
 

@@ -4,6 +4,7 @@ import TierSection from '../components/TierSection';
 import LineSection from '../components/LineSection';
 import ViewToggle from '../components/ViewToggle';
 import StreamerRegisterModal from '../components/StreamerRegisterModal';
+import AdminKeyModal from '../components/AdminKeyModal';
 import { deleteStreamer, fetchStreamers } from '../api/streamers';
 import { GRADE_ORDER, LINE_ORDER } from '../constants/tiers';
 import type { Streamer } from '../types';
@@ -15,6 +16,7 @@ export default function TierDatabasePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Streamer | null>(null);
 
   function loadStreamers() {
     setLoading(true);
@@ -29,10 +31,11 @@ export default function TierDatabasePage() {
     loadStreamers();
   }, []);
 
-  function handleDeleteStreamer(streamer: Streamer) {
-    deleteStreamer(streamer.seq)
-      .then(() => loadStreamers())
-      .catch((err: Error) => setError(err.message));
+  async function handleConfirmDeleteStreamer(adminKey: string) {
+    if (!deleteTarget) return;
+    await deleteStreamer(deleteTarget.seq, adminKey);
+    setDeleteTarget(null);
+    loadStreamers();
   }
 
   const byTier = useMemo(() => {
@@ -78,7 +81,7 @@ export default function TierDatabasePage() {
                   key={group.grade}
                   grade={group.grade}
                   streamers={group.list}
-                  onDeleteStreamer={handleDeleteStreamer}
+                  onDeleteStreamer={setDeleteTarget}
                 />
               ))
             : byLine.map((group) => (
@@ -86,7 +89,7 @@ export default function TierDatabasePage() {
                   key={group.line}
                   line={group.line}
                   streamers={group.list}
-                  onDeleteStreamer={handleDeleteStreamer}
+                  onDeleteStreamer={setDeleteTarget}
                 />
               ))}
         </>
@@ -99,6 +102,14 @@ export default function TierDatabasePage() {
             setShowRegisterModal(false);
             loadStreamers();
           }}
+        />
+      )}
+
+      {deleteTarget && (
+        <AdminKeyModal
+          message={`${deleteTarget.streamerName}님을 삭제하시겠습니까?`}
+          onConfirm={handleConfirmDeleteStreamer}
+          onClose={() => setDeleteTarget(null)}
         />
       )}
     </div>

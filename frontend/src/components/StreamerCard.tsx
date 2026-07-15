@@ -14,10 +14,7 @@ export default function StreamerCard({ streamer, draggableProps, onDelete }: Str
   const [open, setOpen] = useState(false);
 
   function handleDoubleClick() {
-    if (!onDelete) return;
-    if (window.confirm(`${streamer.streamerName}님을 삭제하시겠습니까?`)) {
-      onDelete(streamer);
-    }
+    onDelete?.(streamer);
   }
 
   return (
