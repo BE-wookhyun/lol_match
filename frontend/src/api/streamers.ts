@@ -42,9 +42,10 @@ export async function registerStreamer(payload: StreamerRegisterPayload): Promis
   return res.json();
 }
 
-export async function deleteStreamer(seq: number): Promise<void> {
+export async function deleteStreamer(seq: number, adminKey: string): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/api/streamers/${seq}`, {
     method: 'DELETE',
+    headers: { 'X-Admin-Key': adminKey },
   });
 
   if (!res.ok) {
