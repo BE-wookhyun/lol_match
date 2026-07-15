@@ -31,6 +31,7 @@ export default function TeamBuildPage() {
   const [lineFilter, setLineFilter] = useState<Line | 'ALL'>('ALL');
   const [tierFilter, setTierFilter] = useState<TierName | 'ALL' | 'UNRANKED'>('ALL');
   const [scoreFilter, setScoreFilter] = useState<number | 'ALL'>('ALL');
+  const [nameFilter, setNameFilter] = useState('');
 
   const [teamName, setTeamName] = useState('');
   const [captainInput, setCaptainInput] = useState('');
@@ -82,6 +83,7 @@ export default function TeamBuildPage() {
   }, [streamers]);
 
   const pool = useMemo(() => {
+    const keyword = nameFilter.trim().toLowerCase();
     return streamers.filter((s) => {
       if (assignedSeqs.has(s.seq)) return false;
       if (lineFilter !== 'ALL' && s.line !== lineFilter) return false;
@@ -92,9 +94,10 @@ export default function TeamBuildPage() {
         const score = s.score ?? 0;
         if (!bucket || score < bucket.min || score > bucket.max) return false;
       }
+      if (keyword !== '' && !s.streamerName.toLowerCase().includes(keyword)) return false;
       return true;
     });
-  }, [streamers, lineFilter, tierFilter, scoreFilter, scoreBuckets, assignedSeqs]);
+  }, [streamers, lineFilter, tierFilter, scoreFilter, nameFilter, scoreBuckets, assignedSeqs]);
 
   const totalScore = useMemo(() => {
     return LINE_ORDER.reduce((sum, line) => {
@@ -272,6 +275,14 @@ export default function TeamBuildPage() {
         <div className={styles.layout}>
           <aside className={styles.poolPanel}>
             <div className={styles.filters}>
+              <label className={styles.filterLabel}>
+                닉네임
+                <input
+                  value={nameFilter}
+                  onChange={(e) => setNameFilter(e.target.value)}
+                  placeholder="스트리머 닉네임 검색"
+                />
+              </label>
               <label className={styles.filterLabel}>
                 라인
                 <select value={lineFilter} onChange={(e) => setLineFilter(e.target.value as Line | 'ALL')}>
