@@ -67,6 +67,14 @@ public class TeamService {
     }
 
     @Transactional
+    public void delete(Long seq) {
+        if (!teamRepository.existsById(seq)) {
+            throw new TeamNotFoundException(seq);
+        }
+        teamRepository.deleteById(seq);
+    }
+
+    @Transactional
     public void recordMatchResult(TeamMatchResultRequest request) {
         Team team = teamRepository.findByTeamName(request.teamName())
                 .orElseThrow(() -> new TeamNotFoundException(request.teamName()));

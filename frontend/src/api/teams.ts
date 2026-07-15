@@ -58,6 +58,13 @@ export async function fetchTeams(): Promise<TeamCreateResponse[]> {
   return res.json();
 }
 
+export async function deleteTeam(seq: number): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/teams/${seq}`, { method: 'DELETE' });
+  if (!res.ok) {
+    throw new Error(await readErrorMessage(res, `팀 삭제에 실패했습니다. (${res.status})`));
+  }
+}
+
 export interface TeamMatchResultPayload {
   teamName: string;
   opponentTeamName: string;

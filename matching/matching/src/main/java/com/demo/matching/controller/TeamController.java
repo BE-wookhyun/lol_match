@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +58,12 @@ public class TeamController {
     @PatchMapping("/{seq}")
     public TeamResponse updateLineup(@PathVariable Long seq, @Valid @RequestBody TeamLineupUpdateRequest request) {
         return teamService.updateLineup(seq, request);
+    }
+
+    @DeleteMapping("/{seq}")
+    public ResponseEntity<Void> delete(@PathVariable Long seq) {
+        teamService.delete(seq);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/match-results")
