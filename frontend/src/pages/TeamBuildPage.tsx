@@ -18,6 +18,7 @@ import { fetchStreamers } from '../api/streamers';
 import { createTeam } from '../api/teams';
 import { LINE_ORDER, LINE_LABEL_KO, TIER_ORDER, TIER_LABEL_KO } from '../constants/tiers';
 import { recommendCombos, recommendSingleLine, type StreamerCombo } from '../utils/recommend';
+import { calculateComboAdvantage } from '../utils/advantage';
 import type { Line, Streamer, TeamLineup, TierName } from '../types';
 import styles from './TeamBuildPage.module.css';
 
@@ -106,8 +107,19 @@ export default function TeamBuildPage() {
     }, 0);
   }, [lineup, streamers]);
 
-  const isOverScoreLimit = totalScore > MAX_TOTAL_SCORE;
-  const remainingScore = MAX_TOTAL_SCORE - totalScore;
+  const comboAdvantage = useMemo(
+    () =>
+      calculateComboAdvantage(
+        resolveStreamer(lineup.JGL),
+        resolveStreamer(lineup.BOT),
+        resolveStreamer(lineup.SPT)
+      ),
+    [lineup, streamers]
+  );
+
+  const adjustedTotalScore = totalScore + comboAdvantage.score;
+  const isOverScoreLimit = adjustedTotalScore > MAX_TOTAL_SCORE;
+  const remainingScore = MAX_TOTAL_SCORE - adjustedTotalScore;
   const remainingLines = useMemo(
     () => LINE_ORDER.filter((line) => lineup[line] === undefined),
     [lineup]
@@ -356,7 +368,11 @@ export default function TeamBuildPage() {
             </div>
 
             <p className={isOverScoreLimit ? styles.errorText : undefined}>
-              합산 점수: {totalScore}점 / {MAX_TOTAL_SCORE}점
+              합산 점수: {totalScore}점
+              {comboAdvantage.score !== 0 &&
+                ` (어드밴티지 ${comboAdvantage.score}점 · ${comboAdvantage.label} → ${adjustedTotalScore}점)`}
+              {' / '}
+              {MAX_TOTAL_SCORE}점
               {isOverScoreLimit && ` (초과로 팀 구성이 불가합니다)`}
             </p>
             {remainingLines.length > 0 && (
