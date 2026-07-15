@@ -31,7 +31,6 @@ export default function StreamerCard({ streamer, draggableProps, onDelete }: Str
         onMouseLeave={() => setOpen(false)}
         {...draggableProps}
       >
-        <span className={`${styles.statusDot} ${streamer.isLive ? styles.live : styles.offline}`} />
         <img
           src={streamer.streamerIconUrl || personIcon}
           alt={streamer.streamerName}
