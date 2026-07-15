@@ -17,6 +17,7 @@ export default function TierDatabasePage() {
   const [error, setError] = useState<string | null>(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Streamer | null>(null);
+  const [nameFilter, setNameFilter] = useState('');
 
   function loadStreamers() {
     setLoading(true);
@@ -38,19 +39,25 @@ export default function TierDatabasePage() {
     loadStreamers();
   }
 
+  const filteredStreamers = useMemo(() => {
+    const keyword = nameFilter.trim().toLowerCase();
+    if (keyword === '') return streamers;
+    return streamers.filter((s) => s.streamerName.toLowerCase().includes(keyword));
+  }, [streamers, nameFilter]);
+
   const byTier = useMemo(() => {
     return GRADE_ORDER.map((grade) => ({
       grade,
-      list: streamers.filter((s) => s.peakTier === grade),
+      list: filteredStreamers.filter((s) => s.peakTier === grade),
     })).filter((group) => group.list.length > 0);
-  }, [streamers]);
+  }, [filteredStreamers]);
 
   const byLine = useMemo(() => {
     return LINE_ORDER.map((line) => ({
       line,
-      list: streamers.filter((s) => s.line === line),
+      list: filteredStreamers.filter((s) => s.line === line),
     })).filter((group) => group.list.length > 0);
-  }, [streamers]);
+  }, [filteredStreamers]);
 
   return (
     <div className={styles.page}>
@@ -68,6 +75,12 @@ export default function TierDatabasePage() {
         <>
           <div className={styles.toolbar}>
             <ViewToggle value={groupBy} onChange={setGroupBy} />
+            <input
+              className={styles.searchInput}
+              value={nameFilter}
+              onChange={(e) => setNameFilter(e.target.value)}
+              placeholder="스트리머 닉네임 검색"
+            />
             {groupBy === 'tier' ? (
               <ShortcutBar mode="tier" items={byTier.map((g) => g.grade)} />
             ) : (
