@@ -7,7 +7,7 @@ RUN npm install
 
 COPY . .
 
-ARG VITE_API_BASE_URL=http://3.34.150.232:8080
+ARG VITE_API_BASE_URL=https://leole-match.site
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build
 
