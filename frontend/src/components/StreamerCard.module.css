@@ -22,25 +22,6 @@
   box-shadow: var(--shadow-hover);
 }
 
-.statusDot {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  z-index: 1;
-  border: 1.5px solid #fff;
-}
-
-.live {
-  background: var(--color-live);
-}
-
-.offline {
-  background: var(--color-offline);
-}
-
 .avatar {
   width: 100%;
   aspect-ratio: 1 / 1;
