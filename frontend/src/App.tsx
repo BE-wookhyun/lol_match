@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import ContactButton from './components/ContactButton';
 import TierDatabasePage from './pages/TierDatabasePage';
 import TeamBuildPage from './pages/TeamBuildPage';
 import TeamListPage from './pages/TeamListPage';
@@ -17,6 +18,7 @@ function App() {
           <Route path="/matches" element={<MatchRecordPage />} />
         </Routes>
       </main>
+      <ContactButton />
     </>
   );
 }
