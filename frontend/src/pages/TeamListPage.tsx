@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import LineupTable from '../components/LineupTable';
-import { fetchTeams, type TeamCreateResponse } from '../api/teams';
+import { deleteTeam, fetchTeams, type TeamCreateResponse } from '../api/teams';
 import { fetchStreamers } from '../api/streamers';
 import { toLineupSeqs } from '../utils/lineup';
 import type { Streamer } from '../types';
@@ -24,6 +24,16 @@ export default function TeamListPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  async function handleDeleteTeam(team: TeamCreateResponse) {
+    if (!window.confirm(`${team.teamName} 팀을 삭제하시겠습니까?`)) return;
+    try {
+      await deleteTeam(team.seq);
+      setTeams((prev) => prev.filter((t) => t.seq !== team.seq));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '팀 삭제에 실패했습니다.');
+    }
+  }
+
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>구성된 팀 목록</h1>
@@ -37,7 +47,7 @@ export default function TeamListPage() {
 
       <div className={styles.grid}>
         {teams.map((team) => (
-          <div key={team.seq} className={styles.card}>
+          <div key={team.seq} className={styles.card} onDoubleClick={() => handleDeleteTeam(team)}>
             <div className={styles.cardHeader}>
               <h2 className={styles.teamName}>{team.teamName}</h2>
               <span className={styles.captainBadge}>팀장: {team.captainStreamerName}</span>

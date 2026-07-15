@@ -18,7 +18,12 @@ class RiotApiError(Exception):
 
 
 def _get(url: str, retry_on_429: bool = True) -> dict | list:
-    req = urllib.request.Request(url, headers={"X-Riot-Token": os.environ["RIOT_API_KEY"]})
+    # Riot's edge (Cloudflare) blocks the default "Python-urllib/x.y" User-Agent with a 403
+    headers = {
+        "X-Riot-Token": os.environ["RIOT_API_KEY"],
+        "User-Agent": "Mozilla/5.0",
+    }
+    req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=10) as res:
             return json.loads(res.read())
