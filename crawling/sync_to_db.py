@@ -5,12 +5,16 @@ import psycopg2
 from dotenv import load_dotenv
 
 from crawler import fetch_fa_list
+from riot_client import RiotApiError, fetch_solo_rank
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 DB_URL = os.environ["DB_URL"]
 DB_USERNAME = os.environ["DB_USERNAME"]
 DB_PASSWORD = os.environ["DB_PASSWORD"]
+
+# must match riot.season in matching/matching/src/main/resources/application.properties
+RIOT_SEASON = "2025"
 
 
 def _connect():
@@ -69,6 +73,29 @@ def _upsert_score(cur, streamer_seq: int, entry, season: str) -> None:
     )
 
 
+def _upsert_tier(cur, streamer_seq: int, lol_tier: str, lol_rank: str, lp: int, season: str) -> None:
+    cur.execute(
+        "SELECT seq FROM tiers WHERE streamer_seq = %s AND season = %s",
+        (streamer_seq, season),
+    )
+    row = cur.fetchone()
+
+    if row is None:
+        cur.execute(
+            """
+            INSERT INTO tiers (streamer_seq, lol_tier, lol_rank, lp, season, fetched_at)
+            VALUES (%s, %s, %s, %s, %s, now())
+            """,
+            (streamer_seq, lol_tier, lol_rank, lp, season),
+        )
+        return
+
+    cur.execute(
+        "UPDATE tiers SET lol_tier = %s, lol_rank = %s, lp = %s, fetched_at = now() WHERE seq = %s",
+        (lol_tier, lol_rank, lp, row[0]),
+    )
+
+
 def sync_to_db(season: str) -> int:
     entries = fetch_fa_list(season)
     conn = _connect()
@@ -79,6 +106,21 @@ def sync_to_db(season: str) -> int:
                 with conn.cursor() as cur:
                     streamer_seq = _upsert_streamer(cur, entry)
                     _upsert_score(cur, streamer_seq, entry, season)
+
+                    try:
+                        rank_entry = fetch_solo_rank(entry.lol_id, entry.lol_tag)
+                    except RiotApiError as e:
+                        rank_entry = None
+                        print(f"{entry.streamer_id} 랭크 조회 실패: {e}")
+
+                    if rank_entry is None:
+                        print(f"{entry.streamer_id} 솔로랭크 정보 없음 (언랭 또는 조회 실패)")
+                    else:
+                        _upsert_tier(
+                            cur, streamer_seq,
+                            rank_entry["tier"], rank_entry["rank"],
+                            rank_entry["leaguePoints"], RIOT_SEASON,
+                        )
                 conn.commit()
                 synced += 1
             except Exception as e:
