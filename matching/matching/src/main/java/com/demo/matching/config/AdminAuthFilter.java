@@ -36,11 +36,16 @@ public class AdminAuthFilter extends OncePerRequestFilter {
     }
 
     private boolean requiresAdminKey(HttpServletRequest request) {
-        if (!"DELETE".equalsIgnoreCase(request.getMethod())) {
-            return false;
-        }
+        String method = request.getMethod();
         String path = request.getRequestURI();
-        return path.startsWith("/api/streamers/") || path.startsWith("/api/teams/");
+
+        if ("DELETE".equalsIgnoreCase(method)) {
+            return path.startsWith("/api/streamers/") || path.startsWith("/api/teams/");
+        }
+        if ("POST".equalsIgnoreCase(method)) {
+            return path.equals("/api/teams/match-results");
+        }
+        return false;
     }
 
     private boolean isAuthorized(HttpServletRequest request) {
