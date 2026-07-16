@@ -73,3 +73,46 @@
 .removeButton:hover {
   color: var(--color-accent);
 }
+
+.compact {
+  gap: 6px;
+}
+
+.compact .row {
+  grid-template-columns: 34px 1fr 1fr 58px 18px;
+  gap: 6px;
+  padding: 6px 8px;
+  min-height: 32px;
+  border-radius: 6px;
+}
+
+.compact .lineTag {
+  font-size: 9px;
+  padding: 2px 0;
+}
+
+.compact .name {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact .lolId {
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact .tier {
+  font-size: 10px;
+}
+
+.compact .placeholder {
+  font-size: 10px;
+}
+
+.compact .removeButton {
+  font-size: 10px;
+}

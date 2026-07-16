@@ -8,6 +8,7 @@ interface LineupTableProps {
   resolveStreamer: (seq: number | undefined) => Streamer | undefined;
   editable?: boolean;
   onRemove?: (line: Line) => void;
+  compact?: boolean;
 }
 
 function SlotRow({
@@ -50,9 +51,9 @@ function SlotRow({
   );
 }
 
-export default function LineupTable({ lineup, resolveStreamer, editable, onRemove }: LineupTableProps) {
+export default function LineupTable({ lineup, resolveStreamer, editable, onRemove, compact }: LineupTableProps) {
   return (
-    <div className={styles.table}>
+    <div className={`${styles.table} ${compact ? styles.compact : ''}`}>
       {LINE_ORDER.map((line) => (
         <SlotRow
           key={line}
