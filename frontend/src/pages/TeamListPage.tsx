@@ -57,6 +57,7 @@ export default function TeamListPage() {
             <LineupTable
               lineup={toLineupSeqs(team.lineup, streamers)}
               resolveStreamer={(seq) => streamers.find((s) => s.seq === seq)}
+              compact
             />
           </div>
         ))}
