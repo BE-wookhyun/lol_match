@@ -279,16 +279,6 @@ export default function TeamBuildPage() {
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className={styles.page}>
-        <div className={styles.pageHeader}>
-          <a
-            href="https://www.aaa.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.voteButton}
-          >
-            투표하기
-          </a>
-        </div>
         <h1 className={styles.title}>팀 구성하기</h1>
 
         {loading && <p>불러오는 중...</p>}

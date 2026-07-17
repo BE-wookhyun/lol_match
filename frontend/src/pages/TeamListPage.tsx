@@ -37,6 +37,11 @@ export default function TeamListPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.pageHeader}>
+        <a href="https://www.aaa.com" target="_blank" rel="noopener noreferrer" className={styles.voteButton}>
+          투표하러가기
+        </a>
+      </div>
       <h1 className={styles.title}>구성된 팀 목록</h1>
 
       {loading && <p>불러오는 중...</p>}
