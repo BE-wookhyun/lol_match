@@ -52,6 +52,9 @@ public class Team {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "visible", nullable = false, columnDefinition = "boolean not null default true")
+    private boolean visible;
+
     @Builder
     private Team(String teamName, String captainStreamerName, Map<Line, String> lineup) {
         this.teamName = teamName;
@@ -60,6 +63,7 @@ public class Team {
         this.wins = 0;
         this.losses = 0;
         this.vsRecords = new ArrayList<>();
+        this.visible = true;
     }
 
     @PrePersist
