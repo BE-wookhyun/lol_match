@@ -12,6 +12,27 @@
   margin-bottom: 24px;
 }
 
+.pageHeader {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.voteButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.voteButton:hover {
+  background: var(--color-primary-dark);
+}
+
 .errorText {
   font-size: 13px;
   color: var(--color-accent);
