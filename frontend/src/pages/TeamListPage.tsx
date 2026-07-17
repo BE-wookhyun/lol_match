@@ -42,7 +42,7 @@ export default function TeamListPage() {
           투표하러가기
         </a>
       </div>
-      <h1 className={styles.title}>구성된 팀 목록</h1>
+      <h1 className={styles.title}>구성된 팀 목록 (7/18 기준)</h1>
 
       {loading && <p>불러오는 중...</p>}
       {error && <p className={styles.errorText}>{error}</p>}
