@@ -82,8 +82,19 @@ public class Team {
         if (this.vsRecords == null) {
             this.vsRecords = new ArrayList<>();
         }
+        int accumulatedWins = wins;
+        int accumulatedLosses = losses;
+        VsRecord existing = this.vsRecords.stream()
+                .filter(r -> r.opponentTeamName().equals(opponentTeamName))
+                .findFirst()
+                .orElse(null);
+        if (existing != null) {
+            accumulatedWins += existing.wins();
+            accumulatedLosses += existing.losses();
+        }
+
         this.vsRecords.removeIf(r -> r.opponentTeamName().equals(opponentTeamName));
-        this.vsRecords.add(new VsRecord(opponentTeamName, wins, losses));
+        this.vsRecords.add(new VsRecord(opponentTeamName, accumulatedWins, accumulatedLosses));
 
         this.wins = this.vsRecords.stream().mapToInt(VsRecord::wins).sum();
         this.losses = this.vsRecords.stream().mapToInt(VsRecord::losses).sum();
