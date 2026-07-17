@@ -78,6 +78,11 @@ export default function MatchRecordPage() {
     <div className={styles.page}>
       <h1 className={styles.title}>대결 기록</h1>
 
+      <div className={styles.notice}>
+        <span className={styles.noticeIcon}>🔔</span>
+        <span className={styles.noticeText}>확정된 팀의 스크림 기록입니다</span>
+      </div>
+
       <div className={styles.adminBar}>
         <button type="button" className={styles.adminButton} onClick={() => setShowMatchResultModal(true)}>
           전적 입력 (관리자)
