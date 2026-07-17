@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import LineupTable from '../components/LineupTable';
 import AdminKeyModal from '../components/AdminKeyModal';
 import { deleteTeam, fetchTeams, type TeamCreateResponse } from '../api/teams';
@@ -26,6 +26,8 @@ export default function TeamListPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const visibleTeams = useMemo(() => teams.filter((t) => t.visible), [teams]);
+
   async function handleConfirmDeleteTeam(adminKey: string) {
     if (!deleteTarget) return;
     await deleteTeam(deleteTarget.seq, adminKey);
@@ -40,12 +42,12 @@ export default function TeamListPage() {
       {loading && <p>불러오는 중...</p>}
       {error && <p className={styles.errorText}>{error}</p>}
 
-      {!loading && !error && teams.length === 0 && (
+      {!loading && !error && visibleTeams.length === 0 && (
         <p className={styles.emptyText}>아직 구성된 팀이 없습니다.</p>
       )}
 
       <div className={styles.grid}>
-        {teams.map((team) => (
+        {visibleTeams.map((team) => (
           <div key={team.seq} className={styles.card} onDoubleClick={() => setDeleteTarget(team)}>
             <div className={styles.cardHeader}>
               <h2 className={styles.teamName}>{team.teamName}</h2>

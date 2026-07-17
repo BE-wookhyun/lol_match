@@ -25,6 +25,7 @@ export interface TeamCreateResponse {
   winRate: number;
   vsRecords: VsRecord[];
   createdAt: string;
+  visible: boolean;
 }
 
 async function readErrorMessage(res: Response, fallback: string): Promise<string> {

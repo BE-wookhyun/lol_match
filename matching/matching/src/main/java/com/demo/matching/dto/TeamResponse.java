@@ -16,7 +16,8 @@ public record TeamResponse(
         int losses,
         double winRate,
         List<VsRecord> vsRecords,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        boolean visible
 ) {
     public static TeamResponse of(Team team) {
         int wins = team.getWins();
@@ -33,7 +34,8 @@ public record TeamResponse(
                 losses,
                 winRate,
                 team.getVsRecords(),
-                team.getCreatedAt()
+                team.getCreatedAt(),
+                team.isVisible()
         );
     }
 }
