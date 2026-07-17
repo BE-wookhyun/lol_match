@@ -38,7 +38,7 @@ export default function TeamListPage() {
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
-        <a href="https://www.aaa.com" target="_blank" rel="noopener noreferrer" className={styles.voteButton}>
+        <a href="https://gamevote.sooplive.com/?idx=127" target="_blank" rel="noopener noreferrer" className={styles.voteButton}>
           투표하러가기
         </a>
       </div>
