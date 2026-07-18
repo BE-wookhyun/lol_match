@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import LineupTable from '../components/LineupTable';
 import AdminKeyModal from '../components/AdminKeyModal';
+import TeamRankingPanel from '../components/TeamRankingPanel';
 import { deleteTeam, fetchTeams, type TeamCreateResponse } from '../api/teams';
 import { fetchStreamers } from '../api/streamers';
 import { toLineupSeqs } from '../utils/lineup';
@@ -51,23 +52,27 @@ export default function TeamListPage() {
         <p className={styles.emptyText}>아직 구성된 팀이 없습니다.</p>
       )}
 
-      <div className={styles.grid}>
-        {visibleTeams.map((team) => (
-          <div key={team.seq} className={styles.card} onDoubleClick={() => setDeleteTarget(team)}>
-            <div className={styles.cardHeader}>
-              <h2 className={styles.teamName}>{team.teamName}</h2>
-              <span className={styles.captainBadge}>팀장: {team.captainStreamerName}</span>
+      <div className={styles.layout}>
+        <div className={styles.grid}>
+          {visibleTeams.map((team) => (
+            <div key={team.seq} className={styles.card} onDoubleClick={() => setDeleteTarget(team)}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.teamName}>{team.teamName}</h2>
+                <span className={styles.captainBadge}>팀장: {team.captainStreamerName}</span>
+              </div>
+              <p className={styles.record}>
+                {team.wins}승 {team.losses}패 · 승률 {team.winRate.toFixed(1)}%
+              </p>
+              <LineupTable
+                lineup={toLineupSeqs(team.lineup, streamers)}
+                resolveStreamer={(seq) => streamers.find((s) => s.seq === seq)}
+                compact
+              />
             </div>
-            <p className={styles.record}>
-              {team.wins}승 {team.losses}패 · 승률 {team.winRate.toFixed(1)}%
-            </p>
-            <LineupTable
-              lineup={toLineupSeqs(team.lineup, streamers)}
-              resolveStreamer={(seq) => streamers.find((s) => s.seq === seq)}
-              compact
-            />
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <TeamRankingPanel teams={visibleTeams} />
       </div>
 
       {deleteTarget && (

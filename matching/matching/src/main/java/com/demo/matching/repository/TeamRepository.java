@@ -9,5 +9,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
     List<Team> findAllByOrderByCreatedAtDesc();
 
+    List<Team> findAllByVisibleTrueOrderByCreatedAtDesc();
+
     Optional<Team> findByTeamName(String teamName);
 }
