@@ -58,7 +58,7 @@ export default function TeamRankingPanel({ teams }: TeamRankingPanelProps) {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>실시간 순위</h2>
+        <h2 className={styles.sectionTitle}>미리 보는 순위</h2>
         {ranking.length === 0 && <p className={styles.emptyText}>집계된 응원이 없습니다.</p>}
         <ol className={styles.rankList}>
           {ranking.map((item, index) => (
@@ -69,6 +69,7 @@ export default function TeamRankingPanel({ teams }: TeamRankingPanelProps) {
             </li>
           ))}
         </ol>
+        <p className={styles.noticeText}>주의 : 표본이 작아 결과가 정확하지 않을 수 있습니다</p>
       </section>
     </aside>
   );

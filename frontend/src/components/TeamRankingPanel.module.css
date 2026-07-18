@@ -33,6 +33,12 @@
   margin-top: 6px;
 }
 
+.noticeText {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+}
+
 .cheerList {
   display: flex;
   flex-direction: column;
