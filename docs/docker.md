@@ -5,7 +5,10 @@ docker run -d \
   -e DB_USERNAME="" \
   -e DB_PASSWORD="" \
   -e RIOT_API_KEY="" \
+  -e ADMIN_API_KEY="" \
   wookhyunkim/lol_match_backend:latest
+# ADMIN_API_KEY를 비워두면 삭제(DELETE)/전적 입력 API가 항상 403으로 거부됩니다(fail-closed).
+# 프론트의 관리자 키 입력 모달에 이 값과 동일한 키를 입력해야 삭제/전적 입력이 통과합니다.
 
 docker run -d \
   --name lol_match_frontend \
