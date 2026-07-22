@@ -39,3 +39,4 @@ venv/
 
 # Contains DB connection commands - keep local only
 docs/server_db.md
+docs/docker-image.md
