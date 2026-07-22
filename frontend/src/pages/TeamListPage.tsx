@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import LineupTable from '../components/LineupTable';
 import AdminKeyModal from '../components/AdminKeyModal';
-import TeamRankingPanel from '../components/TeamRankingPanel';
+// import TeamRankingPanel from '../components/TeamRankingPanel';
 import { deleteTeam, fetchTeams, type TeamCreateResponse } from '../api/teams';
 import { fetchStreamers } from '../api/streamers';
 import { toLineupSeqs } from '../utils/lineup';
@@ -72,7 +72,7 @@ export default function TeamListPage() {
           ))}
         </div>
 
-        <TeamRankingPanel teams={visibleTeams} />
+        {/* <TeamRankingPanel teams={visibleTeams} /> */}
       </div>
 
       {deleteTarget && (
