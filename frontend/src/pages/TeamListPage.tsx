@@ -39,8 +39,8 @@ export default function TeamListPage() {
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
-        <a href="https://gamevote.sooplive.com/?idx=127" target="_blank" rel="noopener noreferrer" className={styles.voteButton}>
-          투표하러가기
+        <a href="https://your.gg/ko/kr/tournament" target="_blank" rel="noopener noreferrer" className={styles.voteButton}>
+          대진표 확인
         </a>
       </div>
       <h1 className={styles.title}>구성된 팀 목록 (7/18 기준)</h1>
